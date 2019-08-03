@@ -20,30 +20,55 @@ Vue.filter('yuan',function (val,unit) {
 var calculter = new Vue({
   el: '#calculter',
   data: {
-    housePrice: 150,
+    housePrice: '',
     downpayPct: 30,
-    fundLoanCount: 60,
+    fundLoanCount: '',
     fundLoanRate: 3.25,
+    cmcLoanCount: '',
     cmcLoanRate: 4.9,
-    years: '20',
+    years: 20,
     repayType: 'eqInterest',
     monthdataArray: [],
     loanType: 'mix'
   },
+  watch:{
+    loanType: function () {
+      // console.log(this.loanType);
+      if (this.loanType=='cmc'){
+        this.fundLoanCount=0;
+        this.cmcLoanCount=this.totalLoan;
+      }else if (this.loanType=='fund') {
+        this.cmcLoanCount=0;
+        this.fundLoanCount=this.totalLoan;
+      }
+    },
+    fundLoanCount:function () {
+      if (this.loanType=='mix'){
+        if (this.fundLoanCount){
+          (this.cmcLoanCount= this.totalLoan -this.fundLoanCount).toFixed(2);
+          if(this.cmcLoanCount<=0)
+            this.cmcLoanCount=0
+          // console.log(this.cmcLoanCount);
+        }
+      }
+    },
+    cmcLoanCount:function () {
+      if (this.loanType=='mix'){
+        if (this.cmcLoanCount){
+          (this.fundLoanCount= this.totalLoan -this.cmcLoanCount).toFixed(2);
+          if(this.fundLoanCount<=0)
+            this.fundLoanCount=0
+          // console.log(this.fundLoanCount);
+      }
+    }
+  },
+},
   computed: {
     firstPay: function () {
       return this.housePrice*this.downpayPct/100
     },
     totalLoan: function () {
       return (this.housePrice-this.firstPay).toFixed(2)
-    },
-    cmcLoanCount: function () {
-      var cmcloan = this.totalLoan-this.fundLoanCount;
-      if (cmcloan < 0){
-        return 0 ;
-      }else {
-        return cmcloan.toFixed(2) ;
-      }
     },
     month: function () {
       return this.years*12;
